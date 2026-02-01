@@ -1,0 +1,5 @@
+ravdess
+.venv
+*.npy
+*.pdf
+*.env
