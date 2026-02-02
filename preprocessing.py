@@ -47,7 +47,7 @@ def augument(data):
 def parse(root, filename):
     if not filename.endswith('.wav'):
         return
-    args = filename.split('-')
+    args = filename.removesuffix('.wav').split('-')
     emotion = args[2]
     actor = args[6]
     gender = 0 if int(actor) % 2 == 0 else 1
