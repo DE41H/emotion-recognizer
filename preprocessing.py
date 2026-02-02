@@ -76,9 +76,12 @@ def save():
     np.save('data/actors.npy', a)
 
 def main():
+    progress = 0
     for root, _, files in os.walk(PATH):
         for file in files:
             parse(root, file)
+            progress += 1
+        print(f'{progress} files completed, {24 * 60 - progress} files remaining...')
     save()
 
 if __name__ == "__main__":
