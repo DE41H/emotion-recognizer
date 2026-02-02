@@ -81,7 +81,7 @@ def main():
         for file in files:
             parse(root, file)
             progress += 1
-        print(f'{progress} files completed, {24 * 60 - progress} files remaining...')
+        print(f'{(progress * 100) / (24 * 60)}% Complete [{24 * 60 - progress} files remaining]')
     save()
 
 if __name__ == "__main__":
