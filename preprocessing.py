@@ -2,7 +2,6 @@ import os
 import numpy as np
 import librosa as lb
 
-
 PATH = './ravdess'
 SAMPLE_RATE = 22050
 DURATION = 3
@@ -30,6 +29,8 @@ def load(path):
     if len(data) < LENGTH:
         padding = LENGTH - len(data)
         data = np.pad(data, (0, padding), 'constant')
+    elif len(data) > LENGTH:
+        data = data[:LENGTH]
     return data
 
 def extract(data):
@@ -68,10 +69,11 @@ def save():
     y = np.array(labels)
     z = np.array(genders)
     a = np.array(actors)
+    os.makedirs('data', exist_ok=True)
     np.save('data/features.npy', x)
     np.save('data/labels.npy', y)
     np.save('data/genders.npy', z)
-    np.save('data/actors.npz', a)
+    np.save('data/actors.npy', a)
 
 def main():
     for root, _, files in os.walk(PATH):
