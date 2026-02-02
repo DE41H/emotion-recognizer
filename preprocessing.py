@@ -21,6 +21,8 @@ EMOTIONS = {
 
 features = []
 labels = []
+genders = []
+actors = []
 
 def load(path):
     data, _ = lb.load(path, sr=SAMPLE_RATE, duration=DURATION)
@@ -41,31 +43,40 @@ def augument(data):
     data_pitch = lb.effects.pitch_shift(data, sr=SAMPLE_RATE, n_steps=-2)
     return (data_noise, data_pitch)
 
-def parse(file):
-    if not file.endswith('.wav'):
+def parse(root, filename):
+    if not filename.endswith('.wav'):
         return
-    args = file.split('-')
+    args = filename.split('-')
     emotion = args[2]
+    actor = args[6]
+    gender = 0 if int(actor) % 2 == 0 else 1
     if emotion not in EMOTIONS:
         return
-    data = load(file)
+    path = os.path.join(root, filename)
+    data = load(path)
     data_noise, data_pitch = augument(data)
     features.append(extract(data))
     features.append(extract(data_noise))
     features.append(extract(data_pitch))
     for _ in range(3):
         labels.append(EMOTIONS[emotion])
+        actors.append(actor)
+        genders.append(gender)
         
 def save():
     x = np.array(features)
     y = np.array(labels)
+    z = np.array(genders)
+    a = np.array(actors)
     np.save('data/features.npy', x)
     np.save('data/labels.npy', y)
+    np.save('data/genders.npy', z)
+    np.save('data/actors.npz', a)
 
 def main():
     for root, _, files in os.walk(PATH):
         for file in files:
-            parse(file)
+            parse(root, file)
     save()
 
 if __name__ == "__main__":
