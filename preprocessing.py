@@ -63,6 +63,9 @@ def save():
     np.save('data/labels.npy', y)
 
 def main():
+    for root, _, files in os.walk(PATH):
+        for file in files:
+            parse(file)
     save()
 
 if __name__ == "__main__":
