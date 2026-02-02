@@ -8,12 +8,22 @@ SAMPLE_RATE = 22050
 DURATION = 3
 LENGTH = DURATION * SAMPLE_RATE
 NOISE_FACTOR = 0.005
+EMOTIONS = {
+    '01': 0,
+    '02': 1,
+    '03': 2,
+    '04': 3,
+    '05': 4,
+    '06': 5,
+    '07': 6,
+    '08': 7
+}
 
 features = []
 labels = []
 
-def load():
-    data, _ = lb.load(PATH, sr=SAMPLE_RATE, duration=DURATION)
+def load(path):
+    data, _ = lb.load(path, sr=SAMPLE_RATE, duration=DURATION)
     data, _ = lb.effects.trim(data)
     if len(data) < LENGTH:
         padding = LENGTH - len(data)
@@ -31,9 +41,21 @@ def augument(data):
     data_pitch = lb.effects.pitch_shift(data, sr=SAMPLE_RATE, n_steps=-2)
     return (data_noise, data_pitch)
 
-def parse(graph):
-    pass
-
+def parse(file):
+    if not file.endswith('.wav'):
+        return
+    args = file.split('-')
+    emotion = args[2]
+    if emotion not in EMOTIONS:
+        return
+    data = load(file)
+    data_noise, data_pitch = augument(data)
+    features.append(extract(data))
+    features.append(extract(data_noise))
+    features.append(extract(data_pitch))
+    for _ in range(3):
+        labels.append(EMOTIONS[emotion])
+        
 def save():
     x = np.array(features)
     y = np.array(labels)
@@ -41,10 +63,6 @@ def save():
     np.save('data/labels.npy', y)
 
 def main():
-    data = load()
-    data = augument(data)
-    graph = extract(data)
-    parse(graph)
     save()
 
 if __name__ == "__main__":
