@@ -64,7 +64,8 @@ def init(shape):
     # 3. Global Average Pooling (The Efficient Summarizer)
     # This averages the features instead of flattening them, saving memory.
     model.add(layers.GlobalAveragePooling2D())
-
+    model.add(layers.Dense(128, activation='relu'))
+    model.add(layers.Dropout(0.3))
     # 4. Classifier (The Output)
     model.add(layers.Dense(64, activation='relu'))
     model.add(layers.Dense(8, activation='softmax')) # 8 Emotions
@@ -78,8 +79,7 @@ def init(shape):
 def train(model, x_train, x_val, y_train, y_val):
     checkpoint = callbacks.ModelCheckpoint('data/weights.keras', save_best_only=True, monitor='val_accuracy', mode='max')
     dynamic_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr=0.00001, verbose=1)
-    model.layers[0].adapt(x_train)
-    model.fit(
+    history = model.fit(
         x_train, y_train,
         validation_data=(x_val, y_val),
         epochs=EPOCHS,
@@ -87,6 +87,7 @@ def train(model, x_train, x_val, y_train, y_val):
         callbacks=[checkpoint, dynamic_lr],
         verbose=1
     )
+    return history
 
 def test(model, x_test, y_test):
     print(f'Testing Model....')
