@@ -27,7 +27,7 @@ genders = []
 actors = []
 
 def load(path):
-    data, _ = lb.load(path, sr=SAMPLE_RATE, duration=DURATION)
+    data, _ = lb.load(path, sr=SAMPLE_RATE, duration=None)
     data, _ = lb.effects.trim(data)
     data = fix(data)
     return data
@@ -41,14 +41,15 @@ def fix(data):
     return data
 
 def extract(data):
-    graph = lb.feature.melspectrogram(y=data, sr=SAMPLE_RATE)
+    graph = lb.feature.melspectrogram(y=data, sr=SAMPLE_RATE, n_mels=128)
     graph = lb.power_to_db(graph)
     return graph[..., np.newaxis]
 
 def augument(data):
     noise = np.random.randn(LENGTH)
     data_noise = np.array(data + NOISE_FACTOR * noise)
-    data_pitch = lb.effects.pitch_shift(data, sr=SAMPLE_RATE, n_steps=-2)
+    data_deep = lb.effects.pitch_shift(data, sr=SAMPLE_RATE, n_steps=-2)
+    data_shrill = lb.effects.pitch_shift(data, sr=SAMPLE_RATE, n_steps=+2)
     data_fast = lb.effects.time_stretch(data, rate=STRETCH_FACTOR)
     data_fast = fix(data_fast)
     data_slow = lb.effects.time_stretch(data, rate=SHRINK_FACTOR)
@@ -58,7 +59,7 @@ def augument(data):
     if shift > 0:
         data_shift[:shift] = 0
     data_shift = fix(data_shift)
-    return (data_noise, data_pitch, data_fast, data_slow, data_shift)
+    return (data_noise, data_deep, data_shrill, data_fast, data_slow, data_shift)
 
 def parse(root, filename):
     if not filename.endswith('.wav'):
@@ -71,8 +72,8 @@ def parse(root, filename):
         return
     path = os.path.join(root, filename)
     data = load(path)
-    data_noise, data_pitch, data_fast, data_slow, data_shift = augument(data)
-    full_data = (data, data_noise, data_pitch, data_fast, data_slow, data_shift)
+    data_noise, data_deep, data_shrill,  data_fast, data_slow, data_shift = augument(data)
+    full_data = (data, data_noise, data_deep, data_shrill,  data_fast, data_slow, data_shift)
     for item in full_data:
         features.append(extract(item))
         labels.append(EMOTIONS[emotion])
