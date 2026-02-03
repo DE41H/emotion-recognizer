@@ -21,7 +21,7 @@ def split(x, y, a, g):
     y_train, y_temp = y[train_id], y[temp_id]
     a_train, a_temp = a[train_id], a[temp_id]
     g_train, g_temp = g[train_id], g[temp_id]
-    gss_2 = GroupShuffleSplit(n_splits=1, train_size=0.5, random_state=42)
+    gss_2 = GroupShuffleSplit(n_splits=1, test_size=0.5, random_state=42)
     test_id, val_id = next(gss_2.split(x_temp, y_temp, groups=a_temp))
     x_test, x_val = x_temp[test_id], x_temp[val_id]
     y_test, y_val = y_temp[test_id], y_temp[val_id]
