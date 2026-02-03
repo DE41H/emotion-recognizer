@@ -16,9 +16,6 @@ def load():
     a = np.load(os.path.join(PATH, 'actors.npy'))
     if x.ndim == 3:
         x = np.expand_dims(x, axis=-1)
-        y = np.expand_dims(y, axis=-1)
-        a = np.expand_dims(a, axis=-1)
-        g = np.expand_dims(g, axis=-1)
     return x, y, g, a
 
 def split(x, y, a, g):
