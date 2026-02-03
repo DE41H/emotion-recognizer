@@ -3,6 +3,8 @@ import numpy as np
 from tensorflow.keras import models, layers, optimizers, callbacks # type: ignore
 from sklearn.model_selection import train_test_split
 
+var = int(input("1 => Train\n2 => Test\n\n: "))
+
 PATH = './data'
 EPOCHS = 50
 LEARNING_RATE = 0.001
@@ -65,7 +67,7 @@ def train(model, x_train, x_val, y_train, y_val):
     checkpoint = callbacks.ModelCheckpoint('data/weights.keras', save_best_only=True, monitor='val_accuracy', mode='max')
     dynamic_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr=0.00001, verbose=1)
     model.layers[0].adapt(x_train)
-    history = model.fit(
+    model.fit(
         x_train, y_train,
         validation_data=(x_val, y_val),
         epochs=EPOCHS,
@@ -84,8 +86,10 @@ def main():
     x, y, a, g = load()
     (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val) = split(x, y, a, g)
     model = init(x.shape[1:])
-    train(model, x_train, x_val, y_train, y_val)
-    test(model, x_test, y_test)
+    if var == 1:
+        train(model, x_train, x_val, y_train, y_val)
+    elif var == 2:
+        test(model, x_test, y_test)
 
 if __name__ == "__main__":
     main()
