@@ -4,7 +4,7 @@ from tensorflow.keras import models, layers, optimizers, callbacks # type: ignor
 from sklearn.model_selection import train_test_split
 
 PATH = './data'
-EPOCHS = 20
+EPOCHS = 50
 LEARNING_RATE = 0.001
 
 def load():
@@ -61,20 +61,32 @@ def init(shape):
     
     return model
 
-def main():
-    x, y, a, g = load()
-    (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val) = split(x, y, a, g)
-    model = init(x.shape[1:])
-    checkpoint = callbacks.ModelCheckpoint('data/weights.keras', save_best_only=True)
+def train(model, x_train, x_val, y_train, y_val):
+    checkpoint = callbacks.ModelCheckpoint('data/weights.keras', save_best_only=True, monitor='val_accuracy', mode='max')
+    dynamic_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr=0.00001, verbose=1)
     model.layers[0].adapt(x_train)
     history = model.fit(
         x_train, y_train,
         validation_data=(x_val, y_val),
         epochs=EPOCHS,
         batch_size=32,
-        callbacks=[checkpoint],
-        verbose=2
+        callbacks=[checkpoint, dynamic_lr],
+        verbose=1
     )
+
+def test(model, x_test, y_test):
+    print(f'Testing Model....')
+    model.load_weights('data/weights.keras')
+    test_loss, test_acc = model.evaluate(x_test, y_test)
+    print(f'Final Accuracy: {test_acc}\tFinal Loss: {test_loss}')
+
+def main():
+    x, y, a, g = load()
+    (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val) = split(x, y, a, g)
+    model = init(x.shape[1:])
+    train(model, x_train, x_val, y_train, y_val)
+    test(model, x_test, y_test)
+    
 
 if __name__ == "__main__":
     main()
