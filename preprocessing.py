@@ -55,6 +55,8 @@ def augument(data):
     data_slow = fix(data_slow)
     shift = np.random.randint(int(SAMPLE_RATE * SHIFT_FACTOR))
     data_shift = np.roll(data, shift)
+    if shift > 0:
+        data_shift[:shift] = 0
     data_shift = fix(data_shift)
     return (data_noise, data_pitch, data_fast, data_slow, data_shift)
 
@@ -70,13 +72,9 @@ def parse(root, filename):
     path = os.path.join(root, filename)
     data = load(path)
     data_noise, data_pitch, data_fast, data_slow, data_shift = augument(data)
-    features.append(extract(data))
-    features.append(extract(data_noise))
-    features.append(extract(data_pitch))
-    features.append(extract(data_fast))
-    features.append(extract(data_slow))
-    features.append(extract(data_shift))
-    for _ in range(5):
+    full_data = (data, data_noise, data_pitch, data_fast, data_slow, data_shift)
+    for item in full_data:
+        features.append(extract(item))
         labels.append(EMOTIONS[emotion])
         actors.append(actor)
         genders.append(gender)
