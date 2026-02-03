@@ -7,6 +7,9 @@ SAMPLE_RATE = 22050
 DURATION = 3
 LENGTH = DURATION * SAMPLE_RATE
 NOISE_FACTOR = 0.005
+STRETCH_FACTOR = 1.2
+SHRINK_FACTOR = 0.8
+SHIFT_FACTOR = 0.2
 EMOTIONS = {
     '01': 0,
     '02': 1,
@@ -26,6 +29,10 @@ actors = []
 def load(path):
     data, _ = lb.load(path, sr=SAMPLE_RATE, duration=DURATION)
     data, _ = lb.effects.trim(data)
+    data = fix(data)
+    return data
+
+def fix(data):
     if len(data) < LENGTH:
         padding = LENGTH - len(data)
         data = np.pad(data, (0, padding), 'constant')
@@ -42,7 +49,14 @@ def augument(data):
     noise = np.random.randn(LENGTH)
     data_noise = np.array(data + NOISE_FACTOR * noise)
     data_pitch = lb.effects.pitch_shift(data, sr=SAMPLE_RATE, n_steps=-2)
-    return (data_noise, data_pitch)
+    data_fast = lb.effects.time_stretch(data, rate=STRETCH_FACTOR)
+    data_fast = fix(data_fast)
+    data_slow = lb.effects.time_stretch(data, rate=SHRINK_FACTOR)
+    data_slow = fix(data_slow)
+    shift = np.random.randint(int(SAMPLE_RATE * SHIFT_FACTOR))
+    data_shift = np.roll(data, shift)
+    data_shift = fix(data_shift)
+    return (data_noise, data_pitch, data_fast, data_slow, data_shift)
 
 def parse(root, filename):
     if not filename.endswith('.wav'):
@@ -55,11 +69,14 @@ def parse(root, filename):
         return
     path = os.path.join(root, filename)
     data = load(path)
-    data_noise, data_pitch = augument(data)
+    data_noise, data_pitch, data_fast, data_slow, data_shift = augument(data)
     features.append(extract(data))
     features.append(extract(data_noise))
     features.append(extract(data_pitch))
-    for _ in range(3):
+    features.append(extract(data_fast))
+    features.append(extract(data_slow))
+    features.append(extract(data_shift))
+    for _ in range(5):
         labels.append(EMOTIONS[emotion])
         actors.append(actor)
         genders.append(gender)
