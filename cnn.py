@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from tensorflow.keras import models, layers, optimizers, callbacks # type: ignore
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedGroupKFold
 
 var = int(input("1 => Train\n2 => Test\n\n: "))
 
@@ -14,11 +14,26 @@ def load():
     y = np.load(os.path.join(PATH, 'labels.npy'))
     g = np.load(os.path.join(PATH, 'genders.npy'))
     a = np.load(os.path.join(PATH, 'actors.npy'))
+    if x.ndim == 3:
+        x = np.expand_dims(x, axis=-1)
+        y = np.expand_dims(y, axis=-1)
+        a = np.expand_dims(a, axis=-1)
+        g = np.expand_dims(g, axis=-1)
     return x, y, g, a
 
 def split(x, y, a, g):
-    x_train, x_temp, y_train, y_temp, a_train, a_temp, g_train, g_temp = train_test_split(x, y, a, g, train_size=0.8, random_state=42, stratify=y)
-    x_test, x_val, y_test, y_val, a_test, a_val, g_test, g_val = train_test_split(x_temp, y_temp, a_temp, g_temp, train_size=0.5, random_state=42, stratify=y_temp)
+    sgkf = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)
+    train_idx, temp_idx = next(sgkf.split(x, y, groups=a))
+    x_train, x_temp = x[train_idx], x[temp_idx]
+    y_train, y_temp = y[train_idx], y[temp_idx]
+    a_train, a_temp = a[train_idx], a[temp_idx]
+    g_train, g_temp = g[train_idx], g[temp_idx]
+    sgkf_val = StratifiedGroupKFold(n_splits=2, shuffle=True, random_state=42)
+    val_idx, test_idx = next(sgkf_val.split(x_temp, y_temp, groups=a_temp))
+    x_val, x_test = x_temp[val_idx], x_temp[test_idx]
+    y_val, y_test = y_temp[val_idx], y_temp[test_idx]
+    a_val, a_test = a_temp[val_idx], a_temp[test_idx]
+    g_val, g_test = g_temp[val_idx], g_temp[test_idx]
     return (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val)
 
 def init(shape):
@@ -86,6 +101,7 @@ def main():
     x, y, a, g = load()
     (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val) = split(x, y, a, g)
     model = init(x.shape[1:])
+    model.layers[0].adapt(x_train)
     if var == 1:
         train(model, x_train, x_val, y_train, y_val)
     elif var == 2:
