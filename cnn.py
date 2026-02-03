@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from tensorflow.keras import models, layers, optimizers, callbacks # type: ignore
-from sklearn.model_selection import GroupShuffleSplit
+from sklearn.model_selection import train_test_split
 
 PATH = './data'
 EPOCHS = 50
@@ -15,18 +15,8 @@ def load():
     return x, y, g, a
 
 def split(x, y, a, g):
-    gss_1 = GroupShuffleSplit(n_splits=1, train_size=0.8, random_state=42)
-    train_id, temp_id = next(gss_1.split(x, y, groups=a))
-    x_train, x_temp = x[train_id], x[temp_id]
-    y_train, y_temp = y[train_id], y[temp_id]
-    a_train, a_temp = a[train_id], a[temp_id]
-    g_train, g_temp = g[train_id], g[temp_id]
-    gss_2 = GroupShuffleSplit(n_splits=1, test_size=0.5, random_state=42)
-    test_id, val_id = next(gss_2.split(x_temp, y_temp, groups=a_temp))
-    x_test, x_val = x_temp[test_id], x_temp[val_id]
-    y_test, y_val = y_temp[test_id], y_temp[val_id]
-    a_test, a_val = a_temp[test_id], a_temp[val_id]
-    g_test, g_val = g_temp[test_id], g_temp[val_id]
+    x_train, x_temp, y_train, y_temp, a_train, a_temp, g_train, g_temp = train_test_split(x, y, a, g, train_size=0.8, random_state=42, stratify=y)
+    x_test, x_val, y_test, y_val, a_test, a_val, g_test, g_val = train_test_split(x_temp, y_temp, a_temp, g_temp, train_size=0.5, random_state=42, stratify=y_temp)
     return (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val)
 
 def init(shape):
