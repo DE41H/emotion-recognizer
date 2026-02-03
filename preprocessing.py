@@ -46,20 +46,33 @@ def extract(data):
     return graph[..., np.newaxis]
 
 def augument(data):
+    full_data = []
+    full_data.append(data)
     noise = np.random.randn(LENGTH)
     data_noise = np.array(data + NOISE_FACTOR * noise)
+    full_data.append(data_noise)
     data_deep = lb.effects.pitch_shift(data, sr=SAMPLE_RATE, n_steps=-2)
+    full_data.append(data_deep)
     data_shrill = lb.effects.pitch_shift(data, sr=SAMPLE_RATE, n_steps=+2)
+    full_data.append(data_shrill)
     data_fast = lb.effects.time_stretch(data, rate=STRETCH_FACTOR)
     data_fast = fix(data_fast)
+    full_data.append(data_fast)
     data_slow = lb.effects.time_stretch(data, rate=SHRINK_FACTOR)
     data_slow = fix(data_slow)
+    full_data.append(data_slow)
     shift = np.random.randint(int(SAMPLE_RATE * SHIFT_FACTOR))
     data_shift = np.roll(data, shift)
     if shift > 0:
         data_shift[:shift] = 0
     data_shift = fix(data_shift)
-    return (data_noise, data_deep, data_shrill, data_fast, data_slow, data_shift)
+    full_data.append(data_shift)
+    data_inverted = data * -1
+    full_data.append(data_inverted)
+    gain_factor = np.random.uniform(0.8, 1.2)
+    data_gain = data * gain_factor
+    full_data.append(data_gain)
+    return full_data
 
 def parse(root, filename):
     if not filename.endswith('.wav'):
@@ -72,8 +85,7 @@ def parse(root, filename):
         return
     path = os.path.join(root, filename)
     data = load(path)
-    data_noise, data_deep, data_shrill,  data_fast, data_slow, data_shift = augument(data)
-    full_data = (data, data_noise, data_deep, data_shrill,  data_fast, data_slow, data_shift)
+    full_data = augument(data)
     for item in full_data:
         features.append(extract(item))
         labels.append(EMOTIONS[emotion])
