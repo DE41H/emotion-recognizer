@@ -43,6 +43,9 @@ def fix(data):
 def extract(data):
     graph = lb.feature.melspectrogram(y=data, sr=SAMPLE_RATE, n_mels=128)
     graph = lb.power_to_db(graph)
+    low = graph.min()
+    high = graph.max()
+    graph = (graph - low)/(high - low)
     return graph[..., np.newaxis]
 
 def augument(data):
