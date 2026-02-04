@@ -12,10 +12,11 @@ LEARNING_RATE = 0.001
 EMOTIONS = ('Neutral', 'Calm', 'Happy', 'Sad', 'Angry', 'Fearful', 'Disgust', 'Surprised')
 
 def load():
-    x = np.load(os.path.join(PATH, 'features.npy'))
-    y = np.load(os.path.join(PATH, 'labels.npy'))
-    g = np.load(os.path.join(PATH, 'genders.npy'))
-    a = np.load(os.path.join(PATH, 'actors.npy'))
+    ds = np.load(os.path.join(PATH, 'dataset.npz'))
+    x = ds['features']
+    y = ds['labels']
+    g = ds['genders']
+    a = ds['actors']
     if x.ndim == 3:
         x = np.expand_dims(x, axis=-1)
     return x, y, a, g
