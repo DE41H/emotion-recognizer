@@ -2,12 +2,14 @@ import os
 import numpy as np
 from tensorflow.keras import models, layers, optimizers, callbacks # type: ignore
 from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.metrics import classification_report, confusion_matrix
 
 var = int(input("1 => Train\n2 => Test\n\n: "))
 
 PATH = './data'
 EPOCHS = 50
 LEARNING_RATE = 0.001
+EMOTIONS = ('Neutral', 'Calm', 'Happy', 'Sad', 'Angry', 'Fearful', 'Disgust', 'Surprised')
 
 def load():
     x = np.load(os.path.join(PATH, 'features.npy'))
@@ -108,8 +110,17 @@ def train(model, x_train, x_val, y_train, y_val):
 def test(x_test, y_test):
     print(f'Testing Model....')
     model = models.load_model('data/weights.keras')
-    test_loss, test_acc = model.evaluate(x_test, y_test)
-    print(f'Final Accuracy: {test_acc}\tFinal Loss: {test_loss}')
+    predictions = model.predict(x_test)
+    y_pred = np.argmax(predictions, axis=1)
+    print("\n" + "-" * 30)
+    print("CLASSIFICATION REPORT")
+    print("-" * 30)
+    print(classification_report(y_test, y_pred, target_names=EMOTIONS))
+    cm = confusion_matrix(y_test, y_pred)
+    print("\n" + "-" * 30)
+    print("CONFUSION MATRIX (Text)")
+    print("-" * 30)
+    print(cm)
 
 def main():
     x, y, a, g = load()
