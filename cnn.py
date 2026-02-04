@@ -105,21 +105,21 @@ def train(model, x_train, x_val, y_train, y_val):
     )
     return history
 
-def test(model, x_test, y_test):
+def test(x_test, y_test):
     print(f'Testing Model....')
-    model.load_weights('data/weights.keras')
+    model = models.load_model('data/weights.keras')
     test_loss, test_acc = model.evaluate(x_test, y_test)
     print(f'Final Accuracy: {test_acc}\tFinal Loss: {test_loss}')
 
 def main():
     x, y, a, g = load()
     (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val) = split(x, y, a, g)
-    model = init(x.shape[1:])
-    model.layers[0].adapt(x_train)
     if var == 1:
+        model = init(x.shape[1:])
+        model.layers[0].adapt(x_train)
         train(model, x_train, x_val, y_train, y_val)
     elif var == 2:
-        test(model, x_test, y_test)
+        test(x_test, y_test)
 
 if __name__ == "__main__":
     main()
