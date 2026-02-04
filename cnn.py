@@ -129,7 +129,7 @@ def main():
     (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val) = split(x, y, a, g)
     if var == 1 or var == 3:
         model = init(x.shape[1:])
-        model.layers[0].adapt(x_train)
+        model.layers[1].adapt(x_train)
         train(model, x_train, x_val, y_train, y_val)
     elif var == 2 or var ==3:
         test(x_test, y_test)
