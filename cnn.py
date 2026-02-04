@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from tensorflow.keras import models, layers, optimizers, callbacks # type: ignore
-from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.model_selection import GroupShuffleSplit
 
 var = int(input("1 => Train\n2 => Test\n\n: "))
 
@@ -19,14 +19,14 @@ def load():
     return x, y, g, a
 
 def split(x, y, a, g):
-    sgkf = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)
-    train_idx, temp_idx = next(sgkf.split(x, y, groups=a))
+    gss = GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+    train_idx, temp_idx = next(gss.split(x, y, groups=a))
     x_train, x_temp = x[train_idx], x[temp_idx]
     y_train, y_temp = y[train_idx], y[temp_idx]
     a_train, a_temp = a[train_idx], a[temp_idx]
     g_train, g_temp = g[train_idx], g[temp_idx]
-    sgkf_val = StratifiedGroupKFold(n_splits=2, shuffle=True, random_state=42)
-    val_idx, test_idx = next(sgkf_val.split(x_temp, y_temp, groups=a_temp))
+    gss_val = GroupShuffleSplit(n_splits=1, test_size=0.5, random_state=42)
+    val_idx, test_idx = next(gss_val.split(x_temp, y_temp, groups=a_temp))
     x_val, x_test = x_temp[val_idx], x_temp[test_idx]
     y_val, y_test = y_temp[val_idx], y_temp[test_idx]
     a_val, a_test = a_temp[val_idx], a_temp[test_idx]
