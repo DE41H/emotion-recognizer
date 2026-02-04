@@ -5,3 +5,4 @@ ravdess
 *.env
 *.zip
 *.keras
+*.npz
