@@ -10,6 +10,7 @@ NOISE_FACTOR = 0.005
 STRETCH_FACTOR = 1.2
 SHRINK_FACTOR = 0.8
 SHIFT_FACTOR = 0.2
+CUT_LENGTH = 4000
 EMOTIONS = {
     '01': 0,
     '02': 1,
@@ -75,6 +76,11 @@ def augument(data):
     gain_factor = np.random.uniform(0.8, 1.2)
     data_gain = data * gain_factor
     full_data.append(data_gain)
+    data_cut = data.copy()
+    start = np.random.randint(0, LENGTH - CUT_LENGTH)
+    stop = start + CUT_LENGTH
+    data_cut[start:stop] = 0
+    full_data.append(data_cut)
     return full_data
 
 def parse(root, filename):
