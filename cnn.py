@@ -19,18 +19,18 @@ def load():
     return x, y, g, a
 
 def split(x, y, a, g):
-    ss = GroupShuffleSplit(n_splits=10, test_size=0.1, random_state=42)
-    temp_idx, test_idx = next(ss.split(x, y, groups=a))
-    x_test, x_temp = x[test_idx], x[temp_idx]
-    y_test, y_temp = y[test_idx], y[temp_idx]
-    a_test, a_temp = a[test_idx], a[temp_idx]
-    g_test, g_temp = g[test_idx], g[temp_idx]
-    ss_val = GroupShuffleSplit(n_splits=9, test_size=1/9, random_state=42)
-    train_idx, val_idx = next(ss_val.split(x_temp, y_temp, groups=a_temp))
-    x_val, x_train = x_temp[val_idx], x_temp[train_idx]
-    y_val, y_train = y_temp[val_idx], y_temp[train_idx]
-    a_val, a_train = a_temp[val_idx], a_temp[train_idx]
-    g_val, g_train = g_temp[val_idx], g_temp[train_idx]
+    actors = np.unique(a)
+    np.random.seed(42)
+    np.random.shuffle(actors)
+    test_actors = actors[:2]
+    val_actors = actors[2:4]
+    train_actors = actors[4:]
+    test_mask = np.isin(a, test_actors)
+    val_mask = np.isin(a, val_actors)
+    train_mask = np.isin(a, train_actors)
+    x_test, y_test, a_test, g_test = x[test_mask], y[test_mask], a[test_mask], g[test_mask]
+    x_val, y_val, a_val, g_val = x[val_mask], y[val_mask], a[val_mask], g[val_mask]
+    x_train, y_train, a_train, g_train = x[train_mask], y[train_mask], a[train_mask], g[train_mask]
     return (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val)
 
 def init(shape):
