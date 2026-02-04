@@ -4,6 +4,7 @@ import librosa as lb
 
 PATH = './ravdess'
 SAMPLE_RATE = 22050
+N_MELS = 128
 DURATION = 3
 LENGTH = int(DURATION * SAMPLE_RATE)
 NOISE_FACTOR = 0.005
@@ -30,8 +31,8 @@ genders = []
 actors = []
 
 def load(path):
-    data, _ = lb.load(path, sr=SAMPLE_RATE, duration=None)
-    data, _ = lb.effects.trim(data)
+    data, _ = lb.load(path, sr=SAMPLE_RATE, duration=LENGTH)
+    data, _ = lb.effects.trim(data, top_db=30)
     rms = np.sqrt(np.mean(data**2))
     data *= 0.05/rms
     data = fix(data)
@@ -46,7 +47,7 @@ def fix(data):
     return data
 
 def extract(data):
-    graph = lb.feature.melspectrogram(y=data, sr=SAMPLE_RATE, n_mels=128)
+    graph = lb.feature.melspectrogram(y=data, sr=SAMPLE_RATE, n_mels=N_MELS)
     graph = lb.power_to_db(graph)
     low = graph.min()
     high = graph.max()

@@ -137,7 +137,7 @@ def main():
         model = init(x.shape[1:])
         model.layers[1].adapt(x_train)
         train(model, x_train, x_val, y_train, y_val)
-    elif var == 2 or var ==3:
+    if var == 2 or var == 3:
         test(x_test, y_test)
 
 if __name__ == "__main__":
