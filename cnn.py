@@ -7,7 +7,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 var = int(input("1 => Train\n2 => Test\n3 => Train + Test\n\n: "))
 
 PATH = './data'
-EPOCHS = 50
+EPOCHS = 100
 LEARNING_RATE = 0.001
 EMOTIONS = ('Neutral', 'Calm', 'Happy', 'Sad', 'Angry', 'Fearful', 'Disgust', 'Surprised')
 
@@ -96,7 +96,7 @@ def init(shape):
 def train(model, x_train, x_val, y_train, y_val):
     checkpoint = callbacks.ModelCheckpoint('data/weights.keras', save_best_only=True, monitor='val_accuracy', mode='max')
     dynamic_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr=0.00001, verbose=1)
-    early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=7, restore_best_weights=True, verbose=1)
+    early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True, verbose=1)
     history = model.fit(
         x_train, y_train,
         validation_data=(x_val, y_val),
