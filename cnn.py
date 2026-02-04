@@ -46,9 +46,10 @@ def split(x, y, a, g):
 
 def init(shape):
     model = models.Sequential()
+    model.add(layers.Input(shape=shape))
 
     # 1. Normalization (The Input Scaler)
-    model.add(layers.Normalization(axis=None, input_shape=shape))
+    model.add(layers.Normalization(axis=None))
 
     # 2. Convolutional Blocks
     model.add(layers.Conv2D(32, (3, 3), padding='same', use_bias=False))
