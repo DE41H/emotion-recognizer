@@ -31,7 +31,7 @@ genders = []
 actors = []
 
 def load(path):
-    data, _ = lb.load(path, sr=SAMPLE_RATE, duration=LENGTH)
+    data, _ = lb.load(path, sr=SAMPLE_RATE, duration=None)
     data, _ = lb.effects.trim(data, top_db=30)
     rms = np.sqrt(np.mean(data**2))
     data *= 0.05/rms
@@ -39,6 +39,7 @@ def load(path):
     return data
 
 def fix(data):
+    data, _ = lb.effects.trim(data, top_db=30)
     if len(data) < LENGTH:
         padding = int(LENGTH - len(data))
         data = np.pad(data, (0, padding), 'constant')
