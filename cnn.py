@@ -31,6 +31,11 @@ def split(x, y, a, g):
     x_test, y_test, a_test, g_test = x[test_mask], y[test_mask], a[test_mask], g[test_mask]
     x_val, y_val, a_val, g_val = x[val_mask], y[val_mask], a[val_mask], g[val_mask]
     x_train, y_train, a_train, g_train = x[train_mask], y[train_mask], a[train_mask], g[train_mask]
+    print("-" * 30)
+    print(f"Train samples: {len(x_train)}")
+    print(f"Val samples:   {len(x_val)}")
+    print(f"Test samples:  {len(x_test)}")
+    print("-" * 30)
     return (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val)
 
 def init(shape):
