@@ -37,7 +37,7 @@ def load(path):
 
 def fix(data):
     if len(data) < LENGTH:
-        padding = LENGTH - len(data)
+        padding = int(LENGTH - len(data))
         data = np.pad(data, (0, padding), 'constant')
     elif len(data) > LENGTH:
         data = data[:LENGTH]
@@ -110,8 +110,9 @@ def parse(root, filename):
     data = load(path)
     full_data = augument(data)
     for item in full_data:
-        features.append(extract(item))
-        features.append(spec_augument(extract(item)))
+        graph = extract(item)
+        features.append(graph)
+        features.append(spec_augument(graph))
         for _ in range(2):
             labels.append(EMOTIONS[emotion])
             actors.append(actor)
