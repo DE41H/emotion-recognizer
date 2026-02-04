@@ -111,13 +111,11 @@ def parse(root, filename):
     full_data = augument(data)
     for item in full_data:
         features.append(extract(item))
-        labels.append(EMOTIONS[emotion])
-        actors.append(actor)
-        genders.append(gender)
-    features.append(spec_augument(extract(data)))
-    labels.append(EMOTIONS[emotion])
-    actors.append(actor)
-    genders.append(gender)
+        features.append(spec_augument(extract(item)))
+        for _ in range(2):
+            labels.append(EMOTIONS[emotion])
+            actors.append(actor)
+            genders.append(gender)
         
 def save():
     x = np.array(features)
