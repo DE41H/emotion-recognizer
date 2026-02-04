@@ -39,6 +39,13 @@ def init(shape):
     # 1. Normalization (The Input Scaler)
     model.add(layers.Normalization(axis=None, input_shape=shape))
 
+    # 2. Convolutional Blocks
+    model.add(layers.Conv2D(32, (3, 3), padding='same', use_bias=False))
+    model.add(layers.BatchNormalization())
+    model.add(layers.Activation('relu'))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Dropout(0.2))
+
     # 2. Convolutional Blocks (The Feature Extractors)
     # Block 1
     model.add(layers.Conv2D(64, (3, 3), padding='same', use_bias=False))
