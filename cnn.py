@@ -7,7 +7,8 @@ from sklearn.metrics import classification_report, confusion_matrix
 var = int(input("1 => Train\n2 => Test\n3 => Train + Test\n\n: "))
 
 PATH = './data'
-EPOCHS = 100
+EPOCHS = 150
+BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 EMOTIONS = ('Neutral', 'Calm', 'Happy', 'Sad', 'Angry', 'Fearful', 'Disgust', 'Surprised')
 
@@ -47,11 +48,11 @@ def split(x, y, a, g):
 def init(shape):
     model = models.Sequential()
     model.add(layers.Input(shape=shape))
-    model.add(layers.GaussianNoise(0.1))
+    model.add(layers.GaussianNoise(0.05))
     model.add(layers.Normalization(axis=None))
 
     # Block 0
-    model.add(layers.Conv2D(32, (3, 3), padding='same', use_bias=False))
+    model.add(layers.Conv2D(32, (5, 5), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
@@ -62,29 +63,34 @@ def init(shape):
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.SpatialDropout2D(0.3))
+    model.add(layers.SpatialDropout2D(0.2))
 
     # Block 2
     model.add(layers.SeparableConv2D(128, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.SpatialDropout2D(0.4))
+    model.add(layers.SpatialDropout2D(0.3))
 
     # Block 3
     model.add(layers.SeparableConv2D(256, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.SpatialDropout2D(0.5))
+    model.add(layers.SpatialDropout2D(0.4))
 
     # 3. Global Average Pooling (The Efficient Summarizer)
     # This averages the features instead of flattening them, saving memory.
-    model.add(layers.GlobalMaxPooling2D())
-    model.add(layers.Dense(128, use_bias=False))
+    model.add(layers.GlobalAveragePooling2D())
+
+    model.add(layers.Dense(256, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.Dropout(0.5))
+
+    model.add(layers.Dense(128, use_bias=False))
+    model.add(layers.BatchNormalization())
+    model.add(layers.LeakyReLU(alpha=0.1))
 
     # 4. Classifier (The Output)
     model.add(layers.Dense(8, activation='softmax', dtype='float32')) # 8 Emotions
@@ -97,13 +103,13 @@ def init(shape):
 
 def train(model, x_train, x_val, y_train, y_val):
     checkpoint = callbacks.ModelCheckpoint('data/weights.keras', save_best_only=True, monitor='val_accuracy', mode='max')
-    dynamic_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr=0.000001, verbose=1)
+    dynamic_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=7, min_lr=0.000001, verbose=1)
     early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True, verbose=1)
     history = model.fit(
         x_train, y_train,
         validation_data=(x_val, y_val),
         epochs=EPOCHS,
-        batch_size=64,
+        batch_size=BATCH_SIZE,
         callbacks=[checkpoint, dynamic_lr, early_stop],
         verbose=1
     )
