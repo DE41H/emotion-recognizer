@@ -47,47 +47,47 @@ def split(x, y, a, g):
 def init(shape):
     model = models.Sequential()
     model.add(layers.Input(shape=shape))
-
-    # 1. Normalization (The Input Scaler)
+    model.add(layers.GaussianNoise(0.1))
     model.add(layers.Normalization(axis=None))
 
-    # 2. Convolutional Blocks
+    # Block 0
     model.add(layers.Conv2D(32, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
-    model.add(layers.Activation('relu'))
+    model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Dropout(0.2))
+    model.add(layers.SpatialDropout2D(0.1))
 
-    # 2. Convolutional Blocks (The Feature Extractors)
     # Block 1
-    model.add(layers.Conv2D(64, (3, 3), padding='same', use_bias=False))
+    model.add(layers.SeparableConv2D(64, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
-    model.add(layers.Activation('relu'))
+    model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Dropout(0.3))
+    model.add(layers.SpatialDropout2D(0.3))
 
     # Block 2
-    model.add(layers.Conv2D(128, (3, 3), padding='same', use_bias=False))
+    model.add(layers.SeparableConv2D(128, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
-    model.add(layers.Activation('relu'))
+    model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Dropout(0.4))
+    model.add(layers.SpatialDropout2D(0.4))
 
     # Block 3
-    model.add(layers.Conv2D(256, (3, 3), padding='same', use_bias=False))
+    model.add(layers.SeparableConv2D(256, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
-    model.add(layers.Activation('relu'))
+    model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Dropout(0.5))
+    model.add(layers.SpatialDropout2D(0.5))
 
     # 3. Global Average Pooling (The Efficient Summarizer)
     # This averages the features instead of flattening them, saving memory.
-    model.add(layers.GlobalAveragePooling2D())
-    model.add(layers.Dense(128, activation='relu'))
+    model.add(layers.GlobalMaxPooling2D())
+    model.add(layers.Dense(128, use_bias=False))
+    model.add(layers.BatchNormalization())
+    model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.Dropout(0.5))
+
     # 4. Classifier (The Output)
-    model.add(layers.Dense(64, activation='relu'))
-    model.add(layers.Dense(8, activation='softmax')) # 8 Emotions
+    model.add(layers.Dense(8, activation='softmax', dtype='float32')) # 8 Emotions
 
     # Compile the model
     opt = optimizers.Adam(learning_rate=LEARNING_RATE)
