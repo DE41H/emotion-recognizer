@@ -91,7 +91,7 @@ def train(model, x_train, x_val, y_train, y_val):
         x_train, y_train,
         validation_data=(x_val, y_val),
         epochs=EPOCHS,
-        batch_size=32,
+        batch_size=64,
         callbacks=[checkpoint, dynamic_lr, early_stop],
         verbose=1
     )
