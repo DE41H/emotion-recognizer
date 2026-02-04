@@ -62,27 +62,27 @@ def init(shape):
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('relu'))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Dropout(0.2))
+    model.add(layers.Dropout(0.3))
 
     # Block 2
     model.add(layers.Conv2D(128, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('relu'))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Dropout(0.3))
+    model.add(layers.Dropout(0.4))
 
     # Block 3
     model.add(layers.Conv2D(256, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('relu'))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Dropout(0.4))
+    model.add(layers.Dropout(0.5))
 
     # 3. Global Average Pooling (The Efficient Summarizer)
     # This averages the features instead of flattening them, saving memory.
     model.add(layers.GlobalAveragePooling2D())
     model.add(layers.Dense(128, activation='relu'))
-    model.add(layers.Dropout(0.3))
+    model.add(layers.Dropout(0.5))
     # 4. Classifier (The Output)
     model.add(layers.Dense(64, activation='relu'))
     model.add(layers.Dense(8, activation='softmax')) # 8 Emotions
