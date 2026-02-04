@@ -11,6 +11,8 @@ STRETCH_FACTOR = 1.2
 SHRINK_FACTOR = 0.8
 SHIFT_FACTOR = 0.2
 CUT_LENGTH = 4000
+FREQ_MASK = 25
+TIME_MASK = 30
 EMOTIONS = {
     '01': 0,
     '02': 1,
@@ -48,6 +50,18 @@ def extract(data):
     high = graph.max()
     graph = (graph - low)/(high - low)
     return graph[..., np.newaxis]
+
+def spec_augument(graph):
+    spec = graph.copy()
+    n_mels = spec.shape[0]
+    f = np.random.randint(0, FREQ_MASK)
+    f0 = np.random.randint(0, n_mels - f)
+    spec[f0:f0 + f, :, :] = 0
+    n_time = spec.shape[1]
+    t = np.random.randint(0, TIME_MASK)
+    t0 = np.random.randint(0, n_time - t)
+    spec[:, t0:t0 + t, :] = 0
+    return spec
 
 def augument(data):
     full_data = []
@@ -100,6 +114,10 @@ def parse(root, filename):
         labels.append(EMOTIONS[emotion])
         actors.append(actor)
         genders.append(gender)
+    features.append(spec_augument(extract(data)))
+    labels.append(EMOTIONS[emotion])
+    actors.append(actor)
+    genders.append(gender)
         
 def save():
     x = np.array(features)
