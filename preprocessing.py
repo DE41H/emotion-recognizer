@@ -119,15 +119,12 @@ def parse(root, filename):
             genders.append(gender)
         
 def save():
-    x = np.array(features)
-    y = np.array(labels)
-    z = np.array(genders)
-    a = np.array(actors)
+    x = np.array(features).astype('float32')
+    y = np.array(labels).astype('float32')
+    z = np.array(genders).astype('float32')
+    a = np.array(actors).astype('float32')
     os.makedirs('data', exist_ok=True)
-    np.save('data/features.npy', x)
-    np.save('data/labels.npy', y)
-    np.save('data/genders.npy', z)
-    np.save('data/actors.npy', a)
+    np.savez_compressed('data/dataset.npz', features=x, labels=y, genders=z, actors=a)
 
 def main():
     progress = 0
