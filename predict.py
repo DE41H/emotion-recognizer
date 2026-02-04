@@ -2,16 +2,7 @@ import numpy as np
 import preprocessing
 from tensorflow.keras import models # type: ignore
 
-EMOTIONS = {
-    0: 'Neutral',
-    1: 'Calm',
-    2: 'Happy',
-    3: 'Sad',
-    4: 'Angry',
-    5: 'Fearful',
-    6: 'Disgust',
-    7: 'Surprised'
-}
+EMOTIONS = ('Neutral', 'Calm', 'Happy', 'Sad', 'Angry', 'Fearful', 'Disgust', 'Surprised')
 PATH = './data/weights.keras'
 
 def get_data():
@@ -31,7 +22,7 @@ def predict(data):
 def output(predictions):
     idx = np.argmax(predictions)
     confidence = np.max(predictions) * 100
-    emotion = EMOTIONS.get(int(idx), 'Unknown')
+    emotion = EMOTIONS[int(idx)]
     print("-" * 30)
     print(f"Prediction: {emotion}")
     print(f"Confidence: {confidence}%")
