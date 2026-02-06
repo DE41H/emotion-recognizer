@@ -25,10 +25,10 @@ EMOTIONS = {
     '08': 7
 }
 
-features = []
-labels = []
-genders = []
-actors = []
+x_train, x_test, x_val = [], [], []
+y_train, y_test, y_val = [], [], []
+g_train, g_test, g_val = [], [], []
+a_train, a_test, a_val = [], [], []
 
 def load(path):
     data, _ = lb.load(path, sr=SAMPLE_RATE, duration=None)
@@ -101,42 +101,82 @@ def augument(data):
     full_data.append(data_cut)
     return full_data
 
-def parse(root, filename):
-    if not filename.endswith('.wav'):
-        return
-    args = filename.removesuffix('.wav').split('-')
-    emotion = args[2]
-    actor = args[6]
-    gender = 0 if int(actor) % 2 == 0 else 1
-    if emotion not in EMOTIONS:
-        return
-    path = os.path.join(root, filename)
-    data = load(path)
+def get_file_data():
+    files_data = []
+    for root, _, files in os.walk(PATH):
+        for file in files:
+            if not file.endswith('.wav'):
+                continue
+            args = file.removesuffix('.wav')
+            emotion = args[2]
+            actor = args[6]
+            gender = 0 if int(actor) % 2 == 0 else 1
+            if emotion not in EMOTIONS:
+                continue
+            files_data.append({
+                'path': os.path.join(root, file),
+                'label': EMOTIONS[emotion],
+                'actor': int(actor),
+                'gender': gender
+            })
+    return files_data
+
+def parse(file_data, arr_x, arr_y, arr_g, arr_a):
+    data = load(file_data['path'])
+    graph = extract(data)
+    arr_x.append(graph)
+    arr_y.append(file_data['label'])
+    arr_a.append(file_data['actor'])
+    arr_g.append(file_data['gender'])
+
+def parse_and_augument(file_data, arr_x, arr_y, arr_g, arr_a):
+    data = load(file_data['path'])
     full_data = augument(data)
     for item in full_data:
         graph = extract(item)
-        features.append(graph)
-        features.append(spec_augument(graph))
+        arr_x.append(graph)
+        arr_x.append(spec_augument(graph))
         for _ in range(2):
-            labels.append(EMOTIONS[emotion])
-            actors.append(actor)
-            genders.append(gender)
+            arr_y.append(file_data['label'])
+            arr_a.append(file_data['actor'])
+            arr_g.append(file_data['gender'])
         
 def save():
-    x = np.array(features).astype('float32')
-    y = np.array(labels).astype('float32')
-    z = np.array(genders).astype('float32')
-    a = np.array(actors).astype('float32')
+    x = {
+        'train': np.array(x_train).astype('float32'),
+        'test': np.array(x_test).astype('float32'),
+        'val': np.array(x_val).astype('float32'),
+    }
+    y = {
+        'train': np.array(y_train).astype('float32'),
+        'test': np.array(y_test).astype('float32'),
+        'val': np.array(y_val).astype('float32'),
+    }
+    a = {
+        'train': np.array(a_train).astype('float32'),
+        'test': np.array(a_test).astype('float32'),
+        'val': np.array(a_val).astype('float32'),
+    }
+    g = {
+        'train': np.array(g_train).astype('float32'),
+        'test': np.array(g_test).astype('float32'),
+        'val': np.array(g_val).astype('float32'),
+    }
     os.makedirs('data', exist_ok=True)
-    np.savez_compressed('data/dataset.npz', features=x, labels=y, genders=z, actors=a)
+    np.savez_compressed('data/dataset.npz', x_train=x['train'], x_test=x['test'], x_val=x['val'], 
+                        y_train=y['train'], y_test=y['test'], y_val=y['val'], 
+                        g_train=g['train'], g_test=g['test'], g_val=g['val'], 
+                        a_train=a['train'], a_test=a['test'], a_val=a['val'])
 
 def main():
-    progress = 0
-    for root, _, files in os.walk(PATH):
-        for file in files:
-            parse(root, file)
-            progress += 1
-        print(f'{(progress * 100) / (24 * 60)}% Complete [{24 * 60 - progress} files remaining]')
+    files_data = get_file_data()
+    for file_data in files_data:
+        if file_data['actor'] <= 19:
+            parse_and_augument(file_data, x_train, y_train, g_train, a_train)
+        elif file_data['actor'] <= 22:
+            parse(file_data, x_test, y_test, g_test, a_test)
+        else:
+            parse(file_data, x_val, y_val, g_val, a_val)
     save()
 
 if __name__ == "__main__":
