@@ -85,29 +85,38 @@ def train(model, x_train, x_val, y_train, y_val):
     )
     return history
 
-def test(x_test, y_test):
+def test(x_test, y_test, g_test):
     print(f'Testing Model....')
     model = models.load_model('data/weights.keras')
     predictions = model.predict(x_test)
     y_pred = np.argmax(predictions, axis=1)
-    print("\n" + "-" * 30)
+    print("\n" + "-" * 50)
     print("CLASSIFICATION REPORT")
-    print("-" * 30)
+    print("-" * 50)
     print(classification_report(y_test, y_pred, target_names=EMOTIONS))
     cm = confusion_matrix(y_test, y_pred)
-    print("\n" + "-" * 30)
+    print("\n" + "-" * 50)
     print("CONFUSION MATRIX (Text)")
-    print("-" * 30)
+    print("-" * 50)
     print(cm)
+    female_idx = np.where(g_test == 0)[0]
+    male_idx = np.where(g_test == 1)[0]
+    female_acc = np.mean(y_pred[female_idx] == y_test[female_idx])
+    male_acc = np.mean(y_pred[male_idx] == y_test[male_idx])
+    print('\n' + '-' * 50)
+    print('PITCH/GENDER BIAS ANALYSIS')
+    print('-' * 50)
+    print(f'Female Accuracy: {female_acc*100:.2f}%')
+    print(f'Male Accuracy: {male_acc*100:.2f}%')
 
 def main():
     (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val) = load()
     if var == 1 or var == 3:
         model = init(x_train.shape[1:])
         model.layers[1].adapt(x_train)
-        train(model, x_train, x_val, y_train, y_val)
+        history = train(model, x_train, x_val, y_train, y_val)
     if var == 2 or var == 3:
-        test(x_test, y_test)
+        test(x_test, y_test, g_test)
 
 if __name__ == "__main__":
     main()
