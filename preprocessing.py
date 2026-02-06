@@ -33,8 +33,8 @@ a_train, a_test, a_val = [], [], []
 def load(path):
     data, _ = lb.load(path, sr=SAMPLE_RATE, duration=None)
     data, _ = lb.effects.trim(data, top_db=30)
-    rms = np.sqrt(np.mean(data**2))
-    data *= 0.05/rms
+    high = np.abs(data).max()
+    data = data / high
     data = fix(data)
     return data
 
@@ -98,6 +98,10 @@ def augument(data):
     stop = start + CUT_LENGTH
     data_cut[start:stop] = 0
     full_data.append(data_cut)
+    data_fear = lb.effects.pitch_shift(data, sr=SAMPLE_RATE, n_steps=3.5)
+    data_fear = lb.effects.time_stretch(data_fear, rate=1.25)
+    data_fear = fix(data_fear)
+    full_data.append(data_fear)
     return full_data
 
 def get_file_data():
