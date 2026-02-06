@@ -14,35 +14,16 @@ EMOTIONS = ('Neutral', 'Calm', 'Happy', 'Sad', 'Angry', 'Fearful', 'Disgust', 'S
 
 def load():
     ds = np.load(os.path.join(PATH, 'dataset.npz'))
-    x = ds['features']
-    y = ds['labels']
-    g = ds['genders']
-    a = ds['actors']
-    if x.ndim == 3:
-        x = np.expand_dims(x, axis=-1)
-    return x, y, a, g
-
-def split(x, y, a, g):
-    sgkf_outer = StratifiedGroupKFold(n_splits=10, shuffle=True, random_state=42)
-    train_temp_idx, test_idx = next(sgkf_outer.split(x, y, groups=a))
-    x_test = x[test_idx]
-    y_test = y[test_idx]
-    a_test = a[test_idx]
-    g_test = g[test_idx]
-    x_temp = x[train_temp_idx]
-    y_temp = y[train_temp_idx]
-    a_temp = a[train_temp_idx]
-    g_temp = g[train_temp_idx]
-    sgkf_inner = StratifiedGroupKFold(n_splits=9, shuffle=True, random_state=42)
-    train_idx, val_idx = next(sgkf_inner.split(x_temp, y_temp, groups=a_temp))
-    x_train = x_temp[train_idx]
-    y_train = y_temp[train_idx]
-    a_train = a_temp[train_idx]
-    g_train = g_temp[train_idx]
-    x_val = x_temp[val_idx]
-    y_val = y_temp[val_idx]
-    a_val = a_temp[val_idx]
-    g_val = g_temp[val_idx]
+    x_train, x_test, x_val = ds['x_train'], ds['x_test'], ds['x_val']
+    y_train, y_test, y_val = ds['y_train'], ds['y_test'], ds['y_val']
+    a_train, a_test, a_val = ds['a_train'], ds['a_test'], ds['a_val']
+    g_train, g_test, g_val = ds['g_train'], ds['g_test'], ds['g_val']
+    if x_train.ndim == 3:
+        x_train = np.expand_dims(x_train, axis=-1)
+    if x_test.ndim == 3:
+        x_test = np.expand_dims(x_test, axis=-1)
+    if x_val.ndim == 3:
+        x_val = np.expand_dims(x_val, axis=-1)
     return (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val)
 
 def init(shape):
@@ -51,38 +32,31 @@ def init(shape):
     model.add(layers.GaussianNoise(0.05))
     model.add(layers.Normalization(axis=None))
 
-    # Block 0
     model.add(layers.Conv2D(32, (5, 5), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.1))
 
-    # Block 1
     model.add(layers.SeparableConv2D(64, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.2))
 
-    # Block 2
     model.add(layers.SeparableConv2D(128, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.3))
 
-    # Block 3
     model.add(layers.SeparableConv2D(256, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(alpha=0.1))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.4))
 
-    # 3. Global Average Pooling (The Efficient Summarizer)
-    # This averages the features instead of flattening them, saving memory.
     model.add(layers.GlobalAveragePooling2D())
-
     model.add(layers.Dense(256, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(alpha=0.1))
@@ -91,11 +65,8 @@ def init(shape):
     model.add(layers.Dense(128, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(alpha=0.1))
+    model.add(layers.Dense(8, activation='softmax', dtype='float32'))
 
-    # 4. Classifier (The Output)
-    model.add(layers.Dense(8, activation='softmax', dtype='float32')) # 8 Emotions
-
-    # Compile the model
     opt = optimizers.Adam(learning_rate=LEARNING_RATE)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     
@@ -131,10 +102,9 @@ def test(x_test, y_test):
     print(cm)
 
 def main():
-    x, y, a, g = load()
-    (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val) = split(x, y, a, g)
+    (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val) = load()
     if var == 1 or var == 3:
-        model = init(x.shape[1:])
+        model = init(x_train.shape[1:])
         model.layers[1].adapt(x_train)
         train(model, x_train, x_val, y_train, y_val)
     if var == 2 or var == 3:
