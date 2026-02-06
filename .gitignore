@@ -4,5 +4,4 @@ ravdess
 *.pdf
 *.env
 *.zip
-*.keras
 *.npz
