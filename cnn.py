@@ -1,7 +1,6 @@
 import os
 import numpy as np
 from tensorflow.keras import models, layers, optimizers, callbacks # type: ignore
-from sklearn.model_selection import StratifiedGroupKFold
 from sklearn.metrics import classification_report, confusion_matrix
 
 var = int(input("1 => Train\n2 => Test\n3 => Train + Test\n\n: "))
