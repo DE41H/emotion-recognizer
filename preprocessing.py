@@ -39,7 +39,6 @@ def load(path):
     return data
 
 def fix(data):
-    data, _ = lb.effects.trim(data, top_db=30)
     if len(data) < LENGTH:
         padding = int(LENGTH - len(data))
         data = np.pad(data, (0, padding), 'constant')
@@ -107,7 +106,8 @@ def get_file_data():
         for file in files:
             if not file.endswith('.wav'):
                 continue
-            args = file.removesuffix('.wav')
+            file = file.removesuffix('.wav')
+            args = file.split('-')
             emotion = args[2]
             actor = args[6]
             gender = 0 if int(actor) % 2 == 0 else 1
