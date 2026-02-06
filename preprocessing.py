@@ -106,8 +106,7 @@ def get_file_data():
         for file in files:
             if not file.endswith('.wav'):
                 continue
-            file = file.removesuffix('.wav')
-            args = file.split('-')
+            args = file.removesuffix('.wav').split('-')
             emotion = args[2]
             actor = args[6]
             gender = 0 if int(actor) % 2 == 0 else 1
