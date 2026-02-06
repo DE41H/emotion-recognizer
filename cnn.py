@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 from tensorflow.keras import models, layers, optimizers, callbacks # type: ignore
 from sklearn.metrics import classification_report, confusion_matrix
 
@@ -85,6 +86,28 @@ def train(model, x_train, x_val, y_train, y_val):
     )
     return history
 
+def plot_history(history):
+    acc = history.history['accuracy']
+    val_acc = history.history['val_accuracy']
+    loss = history.history['loss']
+    val_loss = history.history['val_loss']
+    epochs = range(len(acc))
+
+    plt.figure(figsize=(15, 5))
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs, acc, label='Training Accuracy')
+    plt.plot(epochs, val_acc, label='Validation Accuracy')
+    plt.legend(loc='lower right')
+    plt.title('Training and Validation Accuracy')
+
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs, loss, label='Training Loss')
+    plt.plot(epochs, val_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation Loss')
+
+    plt.show()
+
 def test(x_test, y_test, g_test):
     print(f'Testing Model....')
     model = models.load_model('data/weights.keras')
@@ -115,6 +138,7 @@ def main():
         model = init(x_train.shape[1:])
         model.layers[1].adapt(x_train)
         history = train(model, x_train, x_val, y_train, y_val)
+        plot_history(history)
     if var == 2 or var == 3:
         test(x_test, y_test, g_test)
 
