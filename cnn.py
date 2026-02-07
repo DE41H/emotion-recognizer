@@ -72,7 +72,7 @@ def init(shape):
     return model
 
 def train(model, x_train, x_val, y_train, y_val):
-    checkpoint = callbacks.ModelCheckpoint('data/weights.keras', save_best_only=True, monitor='val_accuracy', mode='max')
+    checkpoint = callbacks.ModelCheckpoint('data/weights.keras', save_best_only=True, monitor='val_loss', mode='min')
     dynamic_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=9, min_lr=0.000001, verbose=1)
     early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True, verbose=1)
     history = model.fit(
