@@ -1,16 +1,15 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras import models, layers, optimizers, callbacks, regularizers, mixed_precision # type: ignore
+from tensorflow.keras import models, layers, optimizers, callbacks, regularizers # type: ignore
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.utils import class_weight
 
-mixed_precision.set_global_policy('mixed_float16')
 var = int(input("1 => Train\n2 => Test\n3 => Train + Test\n\n: "))
 
 PATH = './data'
 EPOCHS = 100
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 EMOTIONS = ('Neutral', 'Calm', 'Happy', 'Sad', 'Angry', 'Fearful', 'Disgust', 'Surprised')
 

@@ -57,7 +57,7 @@ def extract(data):
     contrast = lb.feature.spectral_contrast(y=data, sr=SAMPLE_RATE)
     contrast = cv2.resize(contrast, (width, height), interpolation=cv2.INTER_LINEAR)
     graph = np.stack([graph, delta, delta_2, tone, contrast], axis=-1)
-    return graph.astype(np.float16)
+    return graph.astype(np.float32)
 
 def spec_augument(graph):
     spec = graph.copy()
@@ -145,9 +145,9 @@ def parse_and_augument(file_data, arr_x, arr_y, arr_g, arr_a):
         
 def save():
     x = {
-        'train': np.array(x_train, dtype=np.float16),
-        'test': np.array(x_test, dtype=np.float16),
-        'val': np.array(x_val, dtype=np.float16),
+        'train': np.array(x_train, dtype=np.float32),
+        'test': np.array(x_test, dtype=np.float32),
+        'val': np.array(x_val, dtype=np.float32),
     }
     y = {
         'train': np.array(y_train, dtype=np.int8),
