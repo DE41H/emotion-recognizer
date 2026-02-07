@@ -173,9 +173,9 @@ def save():
 def main():
     files_data = get_file_data()
     for file_data in files_data:
-        if file_data['actor'] <= 19:
+        if file_data['actor'] <= 18:
             parse_and_augument(file_data, x_train, y_train, g_train, a_train)
-        elif file_data['actor'] <= 22:
+        elif file_data['actor'] <= 21:
             parse(file_data, x_test, y_test, g_test, a_test)
         else:
             parse(file_data, x_val, y_val, g_val, a_val)
