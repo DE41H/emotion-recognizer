@@ -53,9 +53,9 @@ def extract(data):
     delta = lb.feature.delta(graph)
     delta_2 = lb.feature.delta(graph, order=2)
     tone = lb.feature.chroma_stft(y=data, sr=SAMPLE_RATE, n_chroma=12)
-    tone = cv2.resize(tone, (height, width), interpolation=cv2.INTER_LINEAR)
+    tone = cv2.resize(tone, (width, height), interpolation=cv2.INTER_LINEAR)
     contrast = lb.feature.spectral_contrast(y=data, sr=SAMPLE_RATE)
-    contrast = cv2.resize(contrast, (height, width), interpolation=cv2.INTER_LINEAR)
+    contrast = cv2.resize(contrast, (width, height), interpolation=cv2.INTER_LINEAR)
     graph = np.stack([graph, delta, delta_2, tone, contrast], axis=-1)
     return graph.astype(np.float32)
 
@@ -93,8 +93,6 @@ def augument(data):
         data_shift[:shift] = 0
     data_shift = fix(data_shift)
     full_data.append(data_shift)
-    data_inverted = data * -1
-    full_data.append(data_inverted)
     gain_factor = np.random.uniform(0.8, 1.2)
     data_gain = data * gain_factor
     full_data.append(data_gain)
