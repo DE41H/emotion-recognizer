@@ -59,7 +59,7 @@ def init(shape):
     model.add(layers.Dense(256, use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('relu'))
-    model.add(layers.Dropout(0.5))
+    model.add(layers.Dropout(0.7))
 
     model.add(layers.Dense(128, use_bias=False))
     model.add(layers.BatchNormalization())
