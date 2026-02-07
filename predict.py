@@ -11,7 +11,7 @@ def get_data():
     data = preprocessing.load(path)
     data = preprocessing.extract(data)
     if data.ndim == 3:
-        data = np.expand_dims(data, axis=-1)
+        data = np.expand_dims(data, axis=0)
     return data
 
 def predict(data):
