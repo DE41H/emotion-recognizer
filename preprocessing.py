@@ -1,4 +1,5 @@
 import os
+import cv2
 import numpy as np
 import librosa as lb
 
@@ -32,7 +33,7 @@ a_train, a_test, a_val = [], [], []
 
 def load(path):
     data, _ = lb.load(path, sr=SAMPLE_RATE, duration=None)
-    data, _ = lb.effects.trim(data, top_db=30)
+    data, _ = lb.effects.trim(data, top_db=20)
     data = fix(data)
     return data
 
@@ -47,9 +48,15 @@ def fix(data):
 def extract(data):
     graph = lb.feature.melspectrogram(y=data, sr=SAMPLE_RATE, n_mels=N_MELS)
     graph = lb.power_to_db(graph, ref=np.max)
+    height = graph.shape[0]
+    width = graph.shape[1]
     delta = lb.feature.delta(graph)
     delta_2 = lb.feature.delta(graph, order=2)
-    graph = np.stack([graph, delta, delta_2], axis=-1)
+    tone = lb.feature.chroma_stft(y=data, sr=SAMPLE_RATE, n_chroma=12)
+    tone = cv2.resize(tone, (height, width), interpolation=cv2.INTER_LINEAR)
+    contrast = lb.feature.spectral_contrast(y=data, sr=SAMPLE_RATE)
+    contrast = cv2.resize(contrast, (height, width), interpolation=cv2.INTER_LINEAR)
+    graph = np.stack([graph, delta, delta_2, tone, contrast], axis=-1)
     return graph.astype(np.float32)
 
 def spec_augument(graph):
