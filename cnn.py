@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras import models, layers, optimizers, callbacks, regularizers # type: ignore
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.utils import class_weight
 
 var = int(input("1 => Train\n2 => Test\n3 => Train + Test\n\n: "))
 
@@ -31,40 +32,40 @@ def init(shape):
     model.add(layers.Input(shape=shape))
     model.add(layers.Normalization(axis=None))
 
-    model.add(layers.Conv2D(32, (5, 5), padding='same', use_bias=False))
+    model.add(layers.Conv2D(32, (5, 5), padding='same', use_bias=False, kernal_initializer='he_normal'))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.2))
 
-    model.add(layers.Conv2D(64, (3, 3), padding='same', use_bias=False))
+    model.add(layers.Conv2D(64, (3, 3), padding='same', use_bias=False, kernal_initializer='he_normal'))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.3))
 
-    model.add(layers.Conv2D(128, (3, 3), padding='same', use_bias=False))
+    model.add(layers.Conv2D(128, (3, 3), padding='same', use_bias=False, kernal_initializer='he_normal'))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.4))
 
-    model.add(layers.Conv2D(256, (3, 3), padding='same', use_bias=False))
+    model.add(layers.Conv2D(256, (3, 3), padding='same', use_bias=False, kernal_initializer='he_normal'))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.5))
 
     model.add(layers.GlobalMaxPooling2D())
-    model.add(layers.Dense(256, kernel_regularizer=regularizers.l2(0.001), use_bias=False))
+    model.add(layers.Dense(256, kernel_regularizer=regularizers.l2(0.001), kernal_initializer='he_normal', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.Dropout(0.5))
 
-    model.add(layers.Dense(128, kernel_regularizer=regularizers.l2(0.001), use_bias=False))
+    model.add(layers.Dense(128, kernel_regularizer=regularizers.l2(0.001), kernal_initializer='he_normal', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
-    model.add(layers.Dense(8, activation='softmax', dtype='float32'))
+    model.add(layers.Dense(8, activation='softmax', dtype='float32', kernal_initializer='he_normal'))
 
     opt = optimizers.Adam(learning_rate=LEARNING_RATE)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
@@ -75,13 +76,19 @@ def train(model, x_train, x_val, y_train, y_val):
     checkpoint = callbacks.ModelCheckpoint('data/weights.keras', save_best_only=True, monitor='val_loss', mode='min')
     dynamic_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=9, min_lr=0.000001, verbose=1)
     early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True, verbose=1)
+    weights = class_weight.compute_class_weight(
+        class_weight='balanced',
+        classes=np.unique(y_train),
+        y=y_train
+    )
     history = model.fit(
         x_train, y_train,
         validation_data=(x_val, y_val),
         epochs=EPOCHS,
         batch_size=BATCH_SIZE,
         callbacks=[checkpoint, dynamic_lr, early_stop],
-        verbose=1
+        verbose=1,
+        class_weight=weights
     )
     return history
 
