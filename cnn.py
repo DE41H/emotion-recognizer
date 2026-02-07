@@ -1,13 +1,13 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras import models, layers, optimizers, callbacks # type: ignore
+from tensorflow.keras import models, layers, optimizers, callbacks, regularizers # type: ignore
 from sklearn.metrics import classification_report, confusion_matrix
 
 var = int(input("1 => Train\n2 => Test\n3 => Train + Test\n\n: "))
 
 PATH = './data'
-EPOCHS = 150
+EPOCHS = 100
 BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 EMOTIONS = ('Neutral', 'Calm', 'Happy', 'Sad', 'Angry', 'Fearful', 'Disgust', 'Surprised')
@@ -33,37 +33,37 @@ def init(shape):
 
     model.add(layers.Conv2D(32, (5, 5), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
-    model.add(layers.Activation('relu'))
+    model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.2))
 
     model.add(layers.Conv2D(64, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
-    model.add(layers.Activation('relu'))
+    model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.3))
 
     model.add(layers.Conv2D(128, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
-    model.add(layers.Activation('relu'))
+    model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.4))
 
     model.add(layers.Conv2D(256, (3, 3), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
-    model.add(layers.Activation('relu'))
+    model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.5))
 
     model.add(layers.GlobalAveragePooling2D())
-    model.add(layers.Dense(256, use_bias=False))
+    model.add(layers.Dense(256, kernel_regularizer=regularizers.l2(0.001)))
     model.add(layers.BatchNormalization())
-    model.add(layers.Activation('relu'))
-    model.add(layers.Dropout(0.7))
+    model.add(layers.Activation('elu'))
+    model.add(layers.Dropout(0.5))
 
-    model.add(layers.Dense(128, use_bias=False))
+    model.add(layers.Dense(128, kernel_regularizer=regularizers.l2(0.001)))
     model.add(layers.BatchNormalization())
-    model.add(layers.Activation('relu'))
+    model.add(layers.Activation('elu'))
     model.add(layers.Dense(8, activation='softmax', dtype='float32'))
 
     opt = optimizers.Adam(learning_rate=LEARNING_RATE)
@@ -73,7 +73,7 @@ def init(shape):
 
 def train(model, x_train, x_val, y_train, y_val):
     checkpoint = callbacks.ModelCheckpoint('data/weights.keras', save_best_only=True, monitor='val_accuracy', mode='max')
-    dynamic_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=7, min_lr=0.000001, verbose=1)
+    dynamic_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=9, min_lr=0.000001, verbose=1)
     early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True, verbose=1)
     history = model.fit(
         x_train, y_train,
