@@ -46,7 +46,7 @@ def fix(data):
 
 def extract(data):
     graph = lb.feature.melspectrogram(y=data, sr=SAMPLE_RATE, n_mels=N_MELS)
-    graph = lb.power_to_db(graph)
+    graph = lb.power_to_db(graph, ref=np.max)
     delta = lb.feature.delta(graph)
     delta_2 = lb.feature.delta(graph, order=2)
     graph = np.stack([graph, delta, delta_2], axis=-1)
