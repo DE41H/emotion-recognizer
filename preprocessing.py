@@ -57,7 +57,7 @@ def extract(data):
     contrast = lb.feature.spectral_contrast(y=data, sr=SAMPLE_RATE)
     contrast = cv2.resize(contrast, (width, height), interpolation=cv2.INTER_LINEAR)
     graph = np.stack([graph, delta, delta_2, tone, contrast], axis=-1)
-    return graph.astype(np.float32)
+    return graph.astype(np.float16)
 
 def spec_augument(graph):
     spec = graph.copy()
@@ -145,24 +145,24 @@ def parse_and_augument(file_data, arr_x, arr_y, arr_g, arr_a):
         
 def save():
     x = {
-        'train': np.array(x_train).astype('float32'),
-        'test': np.array(x_test).astype('float32'),
-        'val': np.array(x_val).astype('float32'),
+        'train': np.array(x_train, dtype=np.float16),
+        'test': np.array(x_test, dtype=np.float16),
+        'val': np.array(x_val, dtype=np.float16),
     }
     y = {
-        'train': np.array(y_train).astype('float32'),
-        'test': np.array(y_test).astype('float32'),
-        'val': np.array(y_val).astype('float32'),
+        'train': np.array(y_train, dtype=np.int8),
+        'test': np.array(y_test, dtype=np.int8),
+        'val': np.array(y_val, dtype=np.int8),
     }
     a = {
-        'train': np.array(a_train).astype('float32'),
-        'test': np.array(a_test).astype('float32'),
-        'val': np.array(a_val).astype('float32'),
+        'train': np.array(a_train, dtype=np.int8),
+        'test': np.array(a_test, dtype=np.int8),
+        'val': np.array(a_val, dtype=np.int8),
     }
     g = {
-        'train': np.array(g_train).astype('float32'),
-        'test': np.array(g_test).astype('float32'),
-        'val': np.array(g_val).astype('float32'),
+        'train': np.array(g_train, dtype=np.int8),
+        'test': np.array(g_test, dtype=np.int8),
+        'val': np.array(g_val, dtype=np.int8),
     }
     os.makedirs('data', exist_ok=True)
     np.savez_compressed('data/dataset.npz', x_train=x['train'], x_test=x['test'], x_val=x['val'], 
