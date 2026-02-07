@@ -32,40 +32,40 @@ def init(shape):
     model.add(layers.Input(shape=shape))
     model.add(layers.Normalization(axis=None))
 
-    model.add(layers.Conv2D(32, (5, 5), padding='same', use_bias=False, kernal_initializer='he_normal'))
+    model.add(layers.Conv2D(32, (5, 5), padding='same', use_bias=False, kernel_initializer='he_normal'))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.2))
 
-    model.add(layers.Conv2D(64, (3, 3), padding='same', use_bias=False, kernal_initializer='he_normal'))
+    model.add(layers.Conv2D(64, (3, 3), padding='same', use_bias=False, kernel_initializer='he_normal'))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.3))
 
-    model.add(layers.Conv2D(128, (3, 3), padding='same', use_bias=False, kernal_initializer='he_normal'))
+    model.add(layers.Conv2D(128, (3, 3), padding='same', use_bias=False, kernel_initializer='he_normal'))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.4))
 
-    model.add(layers.Conv2D(256, (3, 3), padding='same', use_bias=False, kernal_initializer='he_normal'))
+    model.add(layers.Conv2D(256, (3, 3), padding='same', use_bias=False, kernel_initializer='he_normal'))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.SpatialDropout2D(0.5))
 
     model.add(layers.GlobalMaxPooling2D())
-    model.add(layers.Dense(256, kernel_regularizer=regularizers.l2(0.001), kernal_initializer='he_normal', use_bias=False))
+    model.add(layers.Dense(256, kernel_regularizer=regularizers.l2(0.001), kernel_initializer='he_normal', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.Dropout(0.5))
 
-    model.add(layers.Dense(128, kernel_regularizer=regularizers.l2(0.001), kernal_initializer='he_normal', use_bias=False))
+    model.add(layers.Dense(128, kernel_regularizer=regularizers.l2(0.001), kernel_initializer='he_normal', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
-    model.add(layers.Dense(8, activation='softmax', dtype='float32', kernal_initializer='he_normal'))
+    model.add(layers.Dense(8, activation='softmax', dtype='float32', kernel_initializer='he_normal'))
 
     opt = optimizers.Adam(learning_rate=LEARNING_RATE)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
@@ -81,6 +81,7 @@ def train(model, x_train, x_val, y_train, y_val):
         classes=np.unique(y_train),
         y=y_train
     )
+    weights_dict = dict(enumerate(weights))
     history = model.fit(
         x_train, y_train,
         validation_data=(x_val, y_val),
@@ -88,7 +89,7 @@ def train(model, x_train, x_val, y_train, y_val):
         batch_size=BATCH_SIZE,
         callbacks=[checkpoint, dynamic_lr, early_stop],
         verbose=1,
-        class_weight=weights
+        class_weight=weights_dict
     )
     return history
 
