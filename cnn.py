@@ -56,12 +56,12 @@ def init(shape):
     model.add(layers.SpatialDropout2D(0.5))
 
     model.add(layers.GlobalAveragePooling2D())
-    model.add(layers.Dense(256, kernel_regularizer=regularizers.l2(0.001)))
+    model.add(layers.Dense(256, kernel_regularizer=regularizers.l2(0.001), use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.Dropout(0.5))
 
-    model.add(layers.Dense(128, kernel_regularizer=regularizers.l2(0.001)))
+    model.add(layers.Dense(128, kernel_regularizer=regularizers.l2(0.001), use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation('elu'))
     model.add(layers.Dense(8, activation='softmax', dtype='float32'))
