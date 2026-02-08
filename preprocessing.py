@@ -33,7 +33,7 @@ a_train, a_test, a_val = [], [], []
 
 def load(path):
     data, _ = lb.load(path, sr=SAMPLE_RATE, duration=None)
-    data, _ = lb.effects.trim(data, top_db=20)
+    data, _ = lb.effects.trim(data, top_db=60)
     data = fix(data)
     return data
 
