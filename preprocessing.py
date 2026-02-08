@@ -48,15 +48,8 @@ def fix(data):
 def extract(data):
     graph = lb.feature.melspectrogram(y=data, sr=SAMPLE_RATE, n_mels=N_MELS)
     graph = lb.power_to_db(graph, ref=np.max)
-    height = graph.shape[0]
-    width = graph.shape[1]
     delta = lb.feature.delta(graph)
-    delta_2 = lb.feature.delta(graph, order=2)
-    tone = lb.feature.chroma_stft(y=data, sr=SAMPLE_RATE, n_chroma=12)
-    tone = cv2.resize(tone, (width, height), interpolation=cv2.INTER_LINEAR)
-    contrast = lb.feature.spectral_contrast(y=data, sr=SAMPLE_RATE)
-    contrast = cv2.resize(contrast, (width, height), interpolation=cv2.INTER_LINEAR)
-    graph = np.stack([graph, delta, delta_2, tone, contrast], axis=-1)
+    graph = np.stack([graph, delta], axis=-1)
     return graph.astype(np.float32)
 
 def spec_augument(graph):
