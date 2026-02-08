@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras import models, layers, optimizers, callbacks, losses # type: ignore
+from tensorflow.keras import models, layers, optimizers, callbacks # type: ignore
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.utils import class_weight
 
@@ -57,7 +57,7 @@ def init(shape):
 
     gap = layers.GlobalAveragePooling2D()(x)
     gmp = layers.GlobalMaxPooling2D()(x)
-    x = layers.Concatenate([gap, gmp])
+    x = layers.Concatenate()[gap, gmp]
 
     x = layers.Dense(256, use_bias=False)(x)
     x = layers.BatchNormalization()(x)
@@ -74,7 +74,7 @@ def init(shape):
     model = models.Model(inputs=inputs, outputs=outputs)
 
     opt = optimizers.Adam(learning_rate=LEARNING_RATE)
-    loss = losses.CategoricalCrossentropy(label_smoothing=0.1)
+    loss = 'sparse_categorical_crossentropy'
     model.compile(optimizer=opt, loss=loss, metrics=['accuracy'])
     
     return model
