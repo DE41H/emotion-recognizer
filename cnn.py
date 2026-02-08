@@ -150,7 +150,7 @@ def main():
     (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val) = load()
     if var == 1 or var == 3:
         model = init(x_train.shape[1:])
-        model.layers[0].adapt(x_train)
+        model.layers[1].adapt(x_train)
         history = train(model, x_train, x_val, y_train, y_val)
         plot_history(history)
     if var == 2 or var == 3:
