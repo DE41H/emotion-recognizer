@@ -4,7 +4,7 @@ import librosa as lb
 
 PATH = './ravdess'
 SAMPLE_RATE = 22050
-N_MELS = 128
+N_MELS = 256
 DURATION = 3
 LENGTH = int(DURATION * SAMPLE_RATE)
 NOISE_FACTOR = 0.001
@@ -32,7 +32,7 @@ a_train, a_test, a_val = [], [], []
 
 def load(path):
     data, _ = lb.load(path, sr=SAMPLE_RATE, duration=None)
-    data, _ = lb.effects.trim(data, top_db=60)
+    data, _ = lb.effects.trim(data, top_db=30)
     data = fix(data)
     return data
 
