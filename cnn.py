@@ -57,7 +57,7 @@ def init(shape):
 
     gap = layers.GlobalAveragePooling2D()(x)
     gmp = layers.GlobalMaxPooling2D()(x)
-    x = layers.Concatenate()[gap, gmp]
+    x = layers.Concatenate()([gap, gmp])
 
     x = layers.Dense(256, use_bias=False)(x)
     x = layers.BatchNormalization()(x)
