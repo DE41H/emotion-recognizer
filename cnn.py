@@ -46,13 +46,13 @@ def init(shape):
     x = layers.Conv2D(128, (3, 3), padding='same', use_bias=False)(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation('elu')(x)
-    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.MaxPooling2D((2, 1))(x)
     x = layers.SpatialDropout2D(0.2)(x)
 
     x = layers.Conv2D(256, (3, 3), padding='same', use_bias=False)(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation('elu')(x)
-    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.MaxPooling2D((2, 1))(x)
     x = layers.SpatialDropout2D(0.2)(x)
 
     gap = layers.GlobalAveragePooling2D()(x)
