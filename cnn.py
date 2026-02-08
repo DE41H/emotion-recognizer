@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras import models, layers, optimizers, callbacks, regularizers # type: ignore
+from tensorflow.keras import models, layers, optimizers, callbacks, losses # type: ignore
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.utils import class_weight
 
@@ -10,7 +10,7 @@ var = int(input("1 => Train\n2 => Test\n3 => Train + Test\n\n: "))
 PATH = './data'
 EPOCHS = 100
 BATCH_SIZE = 32
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.0001
 EMOTIONS = ('Neutral', 'Calm', 'Happy', 'Sad', 'Angry', 'Fearful', 'Disgust', 'Surprised')
 
 def load():
@@ -28,48 +28,54 @@ def load():
     return (x_train, x_test, x_val), (y_train, y_test, y_val), (a_train, a_test, a_val), (g_train, g_test, g_val)
 
 def init(shape):
-    model = models.Sequential()
-    model.add(layers.Input(shape=shape))
-    model.add(layers.Normalization(axis=-1))
+    inputs = layers.Input(shape=shape)
+    x = layers.Normalization(axis=-1)(inputs)
 
-    model.add(layers.Conv2D(32, (3, 3), padding='same', use_bias=False))
-    model.add(layers.BatchNormalization())
-    model.add(layers.Activation('swish'))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.SpatialDropout2D(0.1))
+    x = layers.Conv2D(32, (3, 3), padding='same', use_bias=False)(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('elu')(x)
+    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.SpatialDropout2D(0.1)(x)
 
-    model.add(layers.SeparableConv2D(64, (3, 3), padding='same', use_bias=False))
-    model.add(layers.BatchNormalization())
-    model.add(layers.Activation('swish'))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.SpatialDropout2D(0.2))
+    x = layers.Conv2D(64, (3, 3), padding='same', use_bias=False)(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('elu')(x)
+    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.SpatialDropout2D(0.1)(x)
 
-    model.add(layers.SeparableConv2D(128, (3, 3), padding='same', use_bias=False))
-    model.add(layers.BatchNormalization())
-    model.add(layers.Activation('swish'))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.SpatialDropout2D(0.3))
+    x = layers.Conv2D(128, (3, 3), padding='same', use_bias=False)(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('elu')(x)
+    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.SpatialDropout2D(0.2)(x)
 
-    model.add(layers.SeparableConv2D(256, (3, 3), padding='same', use_bias=False))
-    model.add(layers.BatchNormalization())
-    model.add(layers.Activation('swish'))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.SpatialDropout2D(0.3))
+    x = layers.Conv2D(256, (3, 3), padding='same', use_bias=False)(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('elu')(x)
+    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.SpatialDropout2D(0.2)(x)
 
-    model.add(layers.GlobalAveragePooling2D())
-    model.add(layers.Dense(128, use_bias=False))
-    model.add(layers.BatchNormalization())
-    model.add(layers.Activation('swish'))
-    model.add(layers.Dropout(0.5))
+    gap = layers.GlobalAveragePooling2D()(x)
+    gmp = layers.GlobalMaxPooling2D()(x)
+    x = layers.Concatenate([gap, gmp])
 
-    model.add(layers.Dense(64, use_bias=False))
-    model.add(layers.BatchNormalization())
-    model.add(layers.Activation('swish'))
-    model.add(layers.Dense(8, activation='softmax', dtype='float32'))
-    model.add(layers.Dropout(0.3))
+    x = layers.Dense(256, use_bias=False)(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('elu')(x)
+    x = layers.Dropout(0.4)(x)
+
+    x = layers.Dense(128, use_bias=False)(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('elu')(x)
+    x = layers.Dropout(0.3)(x)
+
+    outputs = layers.Dense(8, activation='softmax', dtype='float32')(x)
+
+    model = models.Model(inputs=inputs, outputs=outputs)
 
     opt = optimizers.Adam(learning_rate=LEARNING_RATE)
-    model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    loss = losses.CategoricalCrossentropy(label_smoothing=0.1)
+    model.compile(optimizer=opt, loss=loss, metrics=['accuracy'])
     
     return model
 
