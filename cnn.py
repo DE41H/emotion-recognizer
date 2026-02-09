@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras import models, layers, optimizers, callbacks # type: ignore
+from tensorflow.keras import models, layers, optimizers, callbacks, regularizers # type: ignore
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.utils import class_weight
 
@@ -10,7 +10,7 @@ var = int(input("1 => Train\n2 => Test\n3 => Train + Test\n\n: "))
 PATH = './data'
 EPOCHS = 100
 BATCH_SIZE = 32
-LEARNING_RATE = 0.0001
+LEARNING_RATE = 0.001
 EMOTIONS = ('Neutral', 'Calm', 'Happy', 'Sad', 'Angry', 'Fearful', 'Disgust', 'Surprised')
 
 def load():
@@ -59,12 +59,12 @@ def init(shape):
     gmp = layers.GlobalMaxPooling2D()(x)
     x = layers.Concatenate()([gap, gmp])
 
-    x = layers.Dense(256, use_bias=False)(x)
+    x = layers.Dense(256, use_bias=False, kernel_regularizer=regularizers.l2(0.001))(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation('elu')(x)
     x = layers.Dropout(0.4)(x)
 
-    x = layers.Dense(128, use_bias=False)(x)
+    x = layers.Dense(128, use_bias=False, kernel_regularizer=regularizers.l2(0.001))(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation('elu')(x)
     x = layers.Dropout(0.3)(x)
