@@ -59,15 +59,15 @@ def init(shape):
     gmp = layers.GlobalMaxPooling2D()(x)
     x = layers.Concatenate()([gap, gmp])
 
-    x = layers.Dense(256, use_bias=False, kernel_regularizer=regularizers.l2(0.001))(x)
+    x = layers.Dense(256, use_bias=False, kernel_regularizer=regularizers.l2(0.01))(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation('elu')(x)
-    x = layers.Dropout(0.4)(x)
+    x = layers.Dropout(0.5)(x)
 
-    x = layers.Dense(128, use_bias=False, kernel_regularizer=regularizers.l2(0.001))(x)
+    x = layers.Dense(128, use_bias=False, kernel_regularizer=regularizers.l2(0.01))(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation('elu')(x)
-    x = layers.Dropout(0.3)(x)
+    x = layers.Dropout(0.5)(x)
 
     outputs = layers.Dense(8, activation='softmax', dtype='float32')(x)
 
