@@ -31,6 +31,12 @@ def init(shape):
     inputs = layers.Input(shape=shape)
     x = layers.Normalization(axis=-1)(inputs)
 
+    x = layers.Conv2D(16, (3, 3), padding='same', use_bias=False)(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('elu')(x)
+    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.SpatialDropout2D(0.1)(x)
+
     x = layers.Conv2D(32, (3, 3), padding='same', use_bias=False)(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation('elu')(x)
@@ -40,16 +46,10 @@ def init(shape):
     x = layers.Conv2D(64, (3, 3), padding='same', use_bias=False)(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation('elu')(x)
-    x = layers.MaxPooling2D((2, 2))(x)
-    x = layers.SpatialDropout2D(0.1)(x)
-
-    x = layers.Conv2D(128, (3, 3), padding='same', use_bias=False)(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation('elu')(x)
     x = layers.MaxPooling2D((2, 1))(x)
     x = layers.SpatialDropout2D(0.2)(x)
 
-    x = layers.Conv2D(256, (3, 3), padding='same', use_bias=False)(x)
+    x = layers.Conv2D(128, (3, 3), padding='same', use_bias=False)(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation('elu')(x)
     x = layers.MaxPooling2D((2, 1))(x)
@@ -59,12 +59,12 @@ def init(shape):
     gmp = layers.GlobalMaxPooling2D()(x)
     x = layers.Concatenate()([gap, gmp])
 
-    x = layers.Dense(256, use_bias=False, kernel_regularizer=regularizers.l2(0.01))(x)
+    x = layers.Dense(128, use_bias=False, kernel_regularizer=regularizers.l2(0.01))(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation('elu')(x)
     x = layers.Dropout(0.5)(x)
 
-    x = layers.Dense(128, use_bias=False, kernel_regularizer=regularizers.l2(0.01))(x)
+    x = layers.Dense(64, use_bias=False, kernel_regularizer=regularizers.l2(0.01))(x)
     x = layers.BatchNormalization()(x)
     x = layers.Activation('elu')(x)
     x = layers.Dropout(0.5)(x)
